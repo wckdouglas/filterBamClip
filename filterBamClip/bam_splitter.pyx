@@ -114,11 +114,4 @@ cpdef int filter_bam(str in_bam, str out_bam, float single_end_thresh,
                             output_count += 1
                 if count % 1000000 == 0 and count != 0:
                     print 'Parsed %i alignments' %(count)
-            else:
-                for count, aln in enumerate(inbam):
-                    if qualify_aln(aln) and not check_aln(aln, single_end_thresh, both_end_thresh):
-                        outbam.write(aln)
-                        output_count += 1
-                    if count % 1000000 == 0 and count != 0:
-                        print 'Parsed %i alignments' %(count)
     return output_count
