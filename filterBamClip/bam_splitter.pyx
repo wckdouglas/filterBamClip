@@ -90,19 +90,21 @@ cpdef int filter_bam(str in_bam, str out_bam, float single_end_thresh,
         AlignmentFile inbam, outbam
         AlignedSegment aln
         ndarray cigar_array, all_soft_clipped
+        int aln_count
         int output_count
         bool flag_qualify_ok, soft_clipped, clipped_size_right
         bool inverse_ok, non_inverse_ok
 
     with pysam.AlignmentFile(in_bam,'rb') as inbam:
         with pysam.Samfile(out_bam,'wb',template = inbam) as outbam:
-            for count, aln in enumerate(inbam):
+            for aln_count, aln in enumerate(inbam):
                 flag_qualify_ok = qualify_aln(aln)
-                soft_clipped = 'S' in aln.cigarstring
                 if not aln.is_unmapped and flag_qualify_ok:
+                    soft_clipped = 'S' in aln.cigarstring
                     if not soft_clipped and not inverse:
                         outbam.write(aln)
                         output_count += 1
+
                     elif soft_clipped:
                         clipped_size_right = check_aln(aln, single_end_thresh, both_end_thresh)
 
@@ -112,6 +114,6 @@ cpdef int filter_bam(str in_bam, str out_bam, float single_end_thresh,
                             outbam.write(aln)
                             output_count += 1
 
-                if count % 1000000 == 0 and count != 0:
-                    print 'Parsed %i alignments' %(count)
+                if aln_count % 1000000 == 0 and aln_count != 0:
+                    print 'Parsed %i alignments' %(aln_count)
     return output_count
