@@ -59,8 +59,8 @@ cpdef ndarray split_cigar(cigar_string):
     cigar_array = np.array([cigar_numbers, cigar_operator])
     return cigar_array
 
-cdef int check_aln(int output_count, AlignmentFile outbam, AlignedSegment aln,
-                float single_end_thresh, float both_end_thresh):
+cdef bool check_aln(AlignedSegment aln, float single_end_thresh,
+            float both_end_thresh):
     '''
     Compare soft clip length and threshold and write
     '''
@@ -79,12 +79,10 @@ cdef int check_aln(int output_count, AlignmentFile outbam, AlignedSegment aln,
     max_single_clipped =  all_soft_clipped.max()
     single_pass = abs(max_single_clipped) <  set
     both_pass =  abs(total_clipped) < bet
-    if single_pass and both_pass and not aln.is_unmapped:
-        outbam.write(aln)
-        output_count += 1
-    return output_count
+    return single_pass and both_pass and not aln.is_unmapped
 
-cpdef int filter_bam(str in_bam, str out_bam, float single_end_thresh, float both_end_thresh):
+cpdef int filter_bam(str in_bam, str out_bam, float single_end_thresh,
+                    float both_end_thresh, bool inverse):
     '''
     This function filter softclipped sequence by tresholds regarding to the sequence length
     '''
@@ -93,16 +91,34 @@ cpdef int filter_bam(str in_bam, str out_bam, float single_end_thresh, float bot
         AlignedSegment aln
         ndarray cigar_array, all_soft_clipped
         int output_count
+        bool flag_qualify, soft_clipped, clipped_size_right
 
     with pysam.AlignmentFile(in_bam,'rb') as inbam:
         with pysam.Samfile(out_bam,'wb',template = inbam) as outbam:
             for count, aln in enumerate(inbam):
-                if qualify_aln(aln):
-                    if 'S' not in aln.cigarstring:
+                flag_qualify = qualify_aln(aln)
+                soft_clipped = 'S' in aln.cigarstring
+                if flag_qualify:
+                    if not soft_clipped and not inverse:
                         outbam.write(aln)
                         output_count += 1
                     else:
-                        check_aln(output_count, outbam, aln, single_end_thresh, both_end_thresh)
+                        clipped_size_right = check_aln(aln, single_end_thresh, both_end_thresh)
+
+                        if clipped_size_right and not inverse:
+                            outbam.write(aln)
+                            output_count += 1
+
+                        elif inverse and not clipped_size_right:
+                            outbam.write(aln)
+                            output_count += 1
                 if count % 1000000 == 0 and count != 0:
                     print 'Parsed %i alignments' %(count)
+            else:
+                for count, aln in enumerate(inbam):
+                    if qualify_aln(aln) and not check_aln(aln, single_end_thresh, both_end_thresh):
+                        outbam.write(aln)
+                        output_count += 1
+                    if count % 1000000 == 0 and count != 0:
+                        print 'Parsed %i alignments' %(count)
     return output_count

@@ -4,7 +4,7 @@
 ### Installation ###
 
 ```
-pip install git+https://github.com:wckdouglas/filterBamClip.git
+pip install git+https://github.com/wckdouglas/filterBamClip.git
 ```
 
 

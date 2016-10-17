@@ -15,6 +15,8 @@ def getopt():
                         help ='Maximum ratio of the whole alignment being clipped in one end (default: 0.2)')
     parser.add_argument('-b','--both_end',default = 0.5, type=float,
                         help ='Maximum ratio of the whole alignment being clipped in sum(each end) (default : 0.5)')
+    parser.add_argument('-v','--inverse', action = 'store_true',
+                        help ='Maximum ratio of the whole alignment being clipped in sum(each end) (default : 0.5)')
     args = parser.parse_args()
     return args
 
@@ -25,7 +27,7 @@ def main():
     single_end_thresh = args.single_end
     both_end_thresh = args.both_end
     print 'Filtering %s' %in_bam
-    output_count = filter_bam(in_bam, out_bam, single_end_thresh, both_end_thresh)
+    output_count = filter_bam(in_bam, out_bam, single_end_thresh, both_end_thresh, args.inverse)
     print 'Written %i alignments to %s' %(output_count, out_bam)
 
 if __name__ == '__main__':
