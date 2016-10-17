@@ -1,10 +1,14 @@
 # filterBamClip #
 
 
-### Installation
+### Installation ###
+
 ```
-pip install git+http://github.com:wckdouglas/filterBamClip.git
+pip install git+https://github.com:wckdouglas/filterBamClip.git
 ```
+
+
+### Usage ###
 
 ```
 usage: filterSoftClip.py [-h] -i INBAM [-o OUTBAM] [-s SINGLE_END]
