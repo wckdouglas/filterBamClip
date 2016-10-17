@@ -6,7 +6,7 @@ from numpy cimport ndarray
 from cpython cimport bool
 
 
-cpdef bool qualify_aln(AlignedSegment aln):
+cdef bool qualify_aln(AlignedSegment aln):
     '''
     Check if alignment is properly mapped
     '''
@@ -44,7 +44,7 @@ cpdef int split_bam(str in_bam, str outputprefix):
     print 'Read 2: %i' %(count_R2)
     return 0
 
-cpdef ndarray split_cigar(cigar_string):
+cdef ndarray split_cigar(cigar_string):
     '''
     split cigar string to numpy array
     return:
